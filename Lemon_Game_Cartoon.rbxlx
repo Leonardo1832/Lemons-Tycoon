@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<roblox version="4">
+  <External>null</External>
+  <External>nil</External>
+  <Item class="DataModel" referent="RBX0">
+    <Properties>
+      <string name="Name">Lemon Game</string>
+    </Properties>
+    <Item class="Workspace" referent="RBX1">
+      <Properties>
+        <string name="Name">Workspace</string>
+      </Properties>
+    </Item>
+    <Item class="ServerScriptService" referent="RBX2">
+      <Properties>
+        <string name="Name">ServerScriptService</string>
+      </Properties>
+      <Item class="Script" referent="RBX3">
+        <Properties>
+          <string name="Name">LemonGameSetup</string>
+          <bool name="Disabled">false</bool>
+          <ProtectedString name="Source"><![CDATA[-- LEMON GAME - estilo cartoon
+-- O jogo cria o mapa e a barraca automaticamente.
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+local old = Workspace:FindFirstChild("LemonGame")
+if old then
+    old:Destroy()
+end
+
+local folder = Instance.new("Folder")
+folder.Name = "LemonGame"
+folder.Parent = Workspace
+
+local function part(name, size, position, color)
+    local p = Instance.new("Part")
+    p.Name = name
+    p.Size = size
+    p.Position = position
+    p.Anchored = true
+    p.Color = color
+    p.Material = Enum.Material.SmoothPlastic
+    p.Parent = folder
+    return p
+end
+
+-- Chão e caminho
+part("Grass", Vector3.new(120, 1, 120), Vector3.new(0, -0.5, 0), Color3.fromRGB(105, 205, 95))
+part("Path", Vector3.new(12, 0.15, 70), Vector3.new(0, 0.08, 25), Color3.fromRGB(235, 205, 145))
+
+-- Barraca
+part("Counter", Vector3.new(12, 2, 5), Vector3.new(0, 1, 0), Color3.fromRGB(255, 190, 55))
+part("Roof", Vector3.new(14, 1, 7), Vector3.new(0, 5, 0), Color3.fromRGB(255, 75, 75))
+local sign = part("Sign", Vector3.new(8, 2, 0.35), Vector3.new(0, 6.5, -3.55), Color3.fromRGB(255, 230, 55))
+
+local surface = Instance.new("SurfaceGui")
+surface.Face = Enum.NormalId.Front
+surface.Parent = sign
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.fromScale(1, 1)
+title.BackgroundTransparency = 1
+title.Text = "LEMONADE!"
+title.TextScaled = true
+title.Font = Enum.Font.FredokaOne
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Parent = surface
+
+-- Limões em cima do balcão
+for i = 1, 7 do
+    local lemon = part("Lemon", Vector3.new(1.1, 0.75, 0.75),
+        Vector3.new(-3.5 + i, 2.35, 0), Color3.fromRGB(255, 235, 35))
+    lemon.Shape = Enum.PartType.Ball
+end
+
+-- Árvores cartunescas
+local function tree(x, z)
+    part("Trunk", Vector3.new(1.7, 4, 1.7), Vector3.new(x, 2, z), Color3.fromRGB(135, 85, 45))
+    local crown = part("Leaves", Vector3.new(6, 6, 6), Vector3.new(x, 6, z), Color3.fromRGB(65, 185, 75))
+    crown.Shape = Enum.PartType.Ball
+end
+
+tree(17, 10)
+tree(-17, 10)
+tree(18, -16)
+tree(-18, -16)
+
+-- Dinheiro
+local function setupPlayer(player)
+    local stats = Instance.new("Folder")
+    stats.Name = "leaderstats"
+    stats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = stats
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
+for _, player in ipairs(Players:GetPlayers()) do
+    if not player:FindFirstChild("leaderstats") then
+        setupPlayer(player)
+    end
+end
+
+-- Botão de vender
+local sellPart = part("SellLemonade", Vector3.new(3, 2, 2), Vector3.new(0, 2.5, 4), Color3.fromRGB(255, 230, 50))
+local prompt = Instance.new("ProximityPrompt")
+prompt.ActionText = "Vender limonada"
+prompt.ObjectText = "Barraca de limões"
+prompt.HoldDuration = 0.4
+prompt.MaxActivationDistance = 12
+prompt.Parent = sellPart
+
+local cooldown = {}
+prompt.Triggered:Connect(function(player)
+    if cooldown[player] then return end
+    cooldown[player] = true
+
+    local stats = player:FindFirstChild("leaderstats")
+    local coins = stats and stats:FindFirstChild("Coins")
+    if coins then
+        coins.Value += 5
+    end
+
+    task.wait(1)
+    cooldown[player] = nil
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    cooldown[player] = nil
+end)
+
+print("Lemon Game carregado!")
+]]></ProtectedString>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+</roblox>
